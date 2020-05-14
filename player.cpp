@@ -11,12 +11,12 @@
 // 変数
 int gameCNT;		//ｹﾞｰﾑが動いているか確認用のｶｳﾝﾄ
 
-int mapImage[272][352];		//ﾏｯﾌﾟ
+XY mapPos;			//ﾏｯﾌﾟのoffset
 
 int playerImage;	//ﾌﾟﾚｲﾔｰ
-XY playerPos;		//P1の位置(X,Y)
+XY playerPos;		//P1の座標(X,Y)
 
-int speed;		//歩く速さ
+int speed;			//歩く速さ
 int Cr;				//ｷｬﾗの色
 
 /* ｹﾞｰﾑﾙｰﾌﾟ */
@@ -52,7 +52,7 @@ bool SystemInit(void)
 {
 	//ｼｽﾃﾑの初期化
 	SetWindowText("1916015_Kuwata Masato");
-	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, MAP_CHIP_SIZE);
+	SetGraphMode(SCREEN_SIZE_X, SCREEN_SIZE_Y, 16);
 	ChangeWindowMode(true);
 
 	//DXﾗｲﾌﾞﾗﾘの初期化
@@ -61,20 +61,14 @@ bool SystemInit(void)
 		return  false;
 	}
 	SetDrawScreen(DX_SCREEN_BACK);
-	//for (int y = 0; y < MAP_Y; y++)
-	//{
-	//	for (int x = 0; x < MAP_X; x++)
-	//	{
-	//		LoadDivGraph("Nos_image/park01.png", 39, MAP_X, MAP_Y, MAP_CHIP_SIZE, MAP_CHIP_SIZE, mapImage[0]);
-	//	}
 
-	//}
 	
 
 	Cr = GetColor(200, 0, 0);
 	gameCNT = 0;
 	speed = 4;
 	playerPos = { SCREEN_SIZE_X / 2 ,SCREEN_SIZE_Y / 2 };
+	mapPos = { 0,0 };
 
 	return true;
 }
@@ -91,38 +85,44 @@ void MainControl(void)
 			playerPos.x -= speed;
 		}
 	}
-	
 
 	//右
-	if (CheckHitKey(KEY_INPUT_D))
+	if (playerPos.x <= SCREEN_SIZE_X)
 	{
-		playerPos.x += speed;
+		if (CheckHitKey(KEY_INPUT_D))
+		{
+			playerPos.x += speed;
+		}
 	}
+	
 
 	//上
-	if (CheckHitKey(KEY_INPUT_W))
+	if (playerPos.y >= 0)
 	{
-		playerPos.y -= speed;
+		if (CheckHitKey(KEY_INPUT_W))
+		{
+			playerPos.y -= speed;
+		}
 	}
 
+
 	//下
-	if (CheckHitKey(KEY_INPUT_S))
+	if (playerPos.y <= SCREEN_SIZE_Y)
 	{
-		playerPos.y += speed;
+		if (CheckHitKey(KEY_INPUT_S))
+		{
+			playerPos.y += speed;
+		}
 	}
+	
+
+
 }
 
 
 //描画関連
 void GameDraw(void)
 {
-	//for (int y = 0; y < MAP_Y; y++)
-	//{
-	//	for (int x = 0; x < MAP_X; x++)
-	//	{
-	//		DrawGraph(0, 0, mapImage[y][x], true);
-	//	}
-	//}
-	DrawCircle(playerPos.x,  playerPos.y, 16, Cr, true);
+	DrawCircle(-mapPos.x + playerPos.x,  -mapPos.y + playerPos.y, P_SIZE / 2, Cr, true);
 	DrawFormatString(0, 0, 0xFFFFFF, "gameCNT : %d", gameCNT);
 }

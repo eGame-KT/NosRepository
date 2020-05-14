@@ -16,9 +16,9 @@
 #define SCREEN_SIZE_X	800			//ｽｸﾘｰﾝのX座標
 #define SCREEN_SIZE_Y	600			//ｽｸﾘｰﾝのY座標
 
-#define MAP_CHIP_SIZE	16			//ﾁｯﾌﾟの大きさ
-#define MAP_X			22			//ﾁｯﾌﾟの数
-#define MAP_Y			17
+
+#define P_SIZE			32			//ﾌﾟﾚｲﾔｰの大きさ(X,Y)←test時16×16
+
 
 //座標
 struct XY
@@ -27,10 +27,11 @@ struct XY
 	int y;					// Y座標
 };
 
+
 /* ----- ﾌﾟﾛﾄﾀｲﾌﾟ宣言 ----- */
 
 bool SystemInit(void);			// ｼｽﾃﾑ系の初期化
 
-void MainControl(void);		// 移動関連
+void MainControl(void);			// 移動関連
 
 void GameDraw(void);			// 描画関連
