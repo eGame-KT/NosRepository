@@ -31,6 +31,6 @@ struct XY
 
 bool SystemInit(void);			// ¼½ÃÑŒn‚Ì‰Šú‰»
 
-XY MainControl(void);		// ˆÚ“®ŠÖ˜A
+void MainControl(void);		// ˆÚ“®ŠÖ˜A
 
 void GameDraw(void);			// •`‰æŠÖ˜A
