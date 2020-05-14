@@ -37,6 +37,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		MainControl();			//ˆÚ“®ˆ—
 
+		GameDraw();			//•`‰æˆ—
 		ScreenFlip();
 	}
 	DxLib_End(); // DxLib‚ÌI—¹
@@ -80,20 +81,35 @@ bool SystemInit(void)
 
 
 //ˆÚ“®ŠÖ˜A
-XY MainControl(void)
+void MainControl(void)
 {
 	//¶
-	if (CheckHitKey(KEY_INPUT_A))
+	if (playerPos.x >= 0)
 	{
-		playerPos.x -= speed;
+		if (CheckHitKey(KEY_INPUT_A))
+		{
+			playerPos.x -= speed;
+		}
 	}
+	
+
 	//‰E
 	if (CheckHitKey(KEY_INPUT_D))
 	{
 		playerPos.x += speed;
 	}
 
-	GameDraw();			//•`‰æˆ—
+	//ã
+	if (CheckHitKey(KEY_INPUT_W))
+	{
+		playerPos.y -= speed;
+	}
+
+	//‰º
+	if (CheckHitKey(KEY_INPUT_S))
+	{
+		playerPos.y += speed;
+	}
 }
 
 
