@@ -1,17 +1,23 @@
-// ﾌﾟﾚｲﾔｰの移動処理 & 移動制御 //
+// ﾌｪｰﾄﾞｲﾝ、ﾌｪｰﾄﾞｱｳﾄ //
 
-// 2020.05.12
+// 2020.05.20
 // Kuwata
+// Aキーでシーン切り替え
+// 十字キーでplayer移動
 
 #include "DxLib.h"
 #include "player.h"
-
+#include "effect.h"
+#include "map.h"
 
 
 // 変数
-int gameCNT;		//ｹﾞｰﾑが動いているか確認用のｶｳﾝﾄ
+// ｼｽﾃﾑ関連
+SCENE_ID sceneID;					// 現在のｼｰﾝ格納用
+SCENE_ID preSceneID;				// 一つ前のｼｰﾝIDを格納用
+int sceneCounter;					// ｼｰﾝ用
+		
 
-XY mapPos;			//ﾏｯﾌﾟのoffset
 
 int playerImage;	//ﾌﾟﾚｲﾔｰ
 XY playerPos;		//P1の座標(X,Y)
@@ -19,7 +25,7 @@ XY playerPos;		//P1の座標(X,Y)
 int speed;			//歩く速さ
 int Cr;				//ｷｬﾗの色
 
-/* ｹﾞｰﾑﾙｰﾌﾟ */
+/* WinMain */
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	//ｼｽﾃﾑの初期化
@@ -28,16 +34,69 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		return -1;
 	}
 
-
+	/* ｹﾞｰﾑﾙｰﾌﾟ */
 	while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0)
 	{
 		ClsDrawScreen();	//画面消去
 
-		gameCNT++;
+				//ｼｰﾝｶｳﾝﾀを制御
+		if (sceneID != preSceneID)
+		{
+			preSceneID = sceneID;
+			sceneCounter = 0;
+		}
 
-		MainControl();			//移動処理
+		//ｼｰﾝ
+		switch (sceneID)
+		{
+		case SCENE_ID_INIT:
+			InitScene();
+			break;
+			//ﾀｲﾄﾙｼｰﾝ
+		case SCENE_ID_TITLE:
+			//ﾌｪｰﾄﾞｲﾝ
+			if (fadeIn)
+			{
+				if(!FadeInScreen(5)) {}		// ｴﾌｪｸﾄ終了後の処理
+			}
+			else if(fadeOut)
+			{
+				if (!FadeOutScreen(5))
+				{
+					// ｴﾌｪｸﾄ終了後の処理
+					sceneID = SCENE_ID_GAME;		// しっかりとｼｰﾝが変わってから、ﾌｪｰﾄﾞｲﾝをtrueにする
+					fadeIn = true;
+				}
+			}
+			TitleScene();
+			break;
 
-		GameDraw();			//描画処理
+		case SCENE_ID_GAME:
+			//ﾌｪｰﾄﾞｲﾝ
+			if (fadeIn)
+			{
+				if (!FadeInScreen(5)) {}		// ｴﾌｪｸﾄ終了後の処理
+			}
+			else if (fadeOut)
+			{
+				if (!FadeOutScreen(5))
+				{
+					// ｴﾌｪｸﾄ終了後の処理
+					sceneID = SCENE_ID_INIT;		// しっかりとｼｰﾝが変わってから、ﾌｪｰﾄﾞｲﾝをtrueにする
+					fadeIn = true;
+				}
+			}
+			GameScene();			//移動処理
+			break;
+
+
+		default:
+			break;
+		}
+
+		sceneCounter++;
+
+	
 		ScreenFlip();
 	}
 	DxLib_End(); // DxLibの終了
@@ -63,24 +122,56 @@ bool SystemInit(void)
 	SetDrawScreen(DX_SCREEN_BACK);
 
 	
-
+	
+	//変数の初期化
 	Cr = GetColor(200, 0, 0);
-	gameCNT = 0;
-	speed = 4;
-	playerPos = { SCREEN_SIZE_X / 2 ,SCREEN_SIZE_Y / 2 };
 	mapPos = { 0,0 };
+
+	sceneCounter = 0;
+	sceneID = SCENE_ID_INIT;
+	preSceneID = SCENE_ID_MAX;
+	fadeIn = true;
 
 	return true;
 }
 
 
-//移動関連
-void MainControl(void)
+/* ｼｰﾝ */
+
+//初期化ｼｰﾝ
+void InitScene(void)
 {
+	speed = 4;
+	playerPos = { SCREEN_SIZE_X / 2 ,SCREEN_SIZE_Y / 2 };
+	MapInit();
+
+	sceneID = SCENE_ID_TITLE;
+}
+
+//ﾀｲﾄﾙｼｰﾝ
+void TitleScene(void)
+{
+	//ｼｰﾝの切り替え
+	if (CheckHitKey(KEY_INPUT_A))
+	{
+		fadeOut = true;
+	}
+	TitleDraw();
+}
+
+//ｹﾞｰﾑｼｰﾝ
+void GameScene(void)
+{
+	//ｼｰﾝの切り替え
+	if (CheckHitKey(KEY_INPUT_A))
+	{
+		fadeOut = true;
+	}
+
 	//左
 	if (playerPos.x >= 0)
 	{
-		if (CheckHitKey(KEY_INPUT_A))
+		if (CheckHitKey(KEY_INPUT_LEFT))
 		{
 			playerPos.x -= speed;
 		}
@@ -89,7 +180,7 @@ void MainControl(void)
 	//右
 	if (playerPos.x <= SCREEN_SIZE_X)
 	{
-		if (CheckHitKey(KEY_INPUT_D))
+		if (CheckHitKey(KEY_INPUT_RIGHT))
 		{
 			playerPos.x += speed;
 		}
@@ -99,7 +190,7 @@ void MainControl(void)
 	//上
 	if (playerPos.y >= 0)
 	{
-		if (CheckHitKey(KEY_INPUT_W))
+		if (CheckHitKey(KEY_INPUT_UP))
 		{
 			playerPos.y -= speed;
 		}
@@ -109,20 +200,28 @@ void MainControl(void)
 	//下
 	if (playerPos.y <= SCREEN_SIZE_Y)
 	{
-		if (CheckHitKey(KEY_INPUT_S))
+		if (CheckHitKey(KEY_INPUT_DOWN))
 		{
 			playerPos.y += speed;
 		}
 	}
 	
 
-
+	GameDraw();			//描画処理
 }
 
 
+
 //描画関連
+void TitleDraw(void)
+{
+	//移動範囲の枠を描画
+	DrawBox(100, 100, SCREEN_SIZE_X - 100, SCREEN_SIZE_Y - 100, 0xFF0000, true);
+	DrawFormatString(0, 0, 0xFFFFFF, "TitleScene : %d", sceneCounter);
+}
+
 void GameDraw(void)
 {
 	DrawCircle(-mapPos.x + playerPos.x,  -mapPos.y + playerPos.y, P_SIZE / 2, Cr, true);
-	DrawFormatString(0, 0, 0xFFFFFF, "gameCNT : %d", gameCNT);
+	DrawFormatString(0, 0, 0xFFFFFF, "GameScene : %d", sceneCounter);
 }

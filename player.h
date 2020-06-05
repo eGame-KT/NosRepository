@@ -12,6 +12,7 @@
 #endif
 
 
+
 // 定数
 #define SCREEN_SIZE_X	800			//ｽｸﾘｰﾝのX座標
 #define SCREEN_SIZE_Y	600			//ｽｸﾘｰﾝのY座標
@@ -19,6 +20,19 @@
 
 #define P_SIZE			32			//ﾌﾟﾚｲﾔｰの大きさ(X,Y)←test時16×16
 
+/* 列挙型 */
+
+//ｼｰﾝ管理用
+enum SCENE_ID {
+	  SCENE_ID_INIT				//ｹﾞｰﾑ初期化ｼｰﾝ
+	, SCENE_ID_TITLE			//ﾀｲﾄﾙｼｰﾝ
+	, SCENE_ID_GAME				//ｹﾞｰﾑｼｰﾝ
+	, SCENE_ID_GAMEOVER			//ｹﾞｰﾑｵｰﾊﾞｰｼｰﾝ
+	, SCENE_ID_MAX
+};
+
+
+/* 構造体 */
 
 //座標
 struct XY
@@ -28,10 +42,18 @@ struct XY
 };
 
 
-/* ----- ﾌﾟﾛﾄﾀｲﾌﾟ宣言 ----- */
+/* ﾌﾟﾛﾄﾀｲﾌﾟ宣言 */
 
-bool SystemInit(void);			// ｼｽﾃﾑ系の初期化
+// ｼｽﾃﾑ系の初期化
+bool SystemInit(void);			
 
-void MainControl(void);			// 移動関連
+// 移動関連
+void InitScene(void);
+void TitleScene(void);
+void GameScene(void);			
 
-void GameDraw(void);			// 描画関連
+// 描画関連
+void TitleDraw(void);
+void GameDraw(void);	
+
+extern XY playerPos;
